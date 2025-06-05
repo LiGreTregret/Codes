@@ -1,0 +1,117 @@
+Sub transfer()
+    '変数の定義
+    Dim i As Integer, j As Integer
+    Dim fromIndex As Integer, toIndex As Integer
+    Dim height As Integer, numColumns As Integer, n_col As Integer
+    Dim arrowExists As Boolean
+    Dim arrowFrom As String, arrowTo As String
+    Dim colorToMove As Long
+
+    arrowFrom = "↑"
+    arrowTo = "↓"
+    n_col = Cells(1, 4).Value
+    
+    '列数の取得
+    If (n_col = 5) Or (n_col = 9) Then
+        numColumns = 4
+    Else
+        numColumns = 5
+    End If
+    
+    '矢印の存在の確認
+    arrowExists = False
+    For i = 2 To 14 Step 6
+        For j = 2 To 10 Step 2
+            If (Cells(i, j).Value = arrowFrom) Or (Cells(i, j).Value = arrowTo) Then
+                arrowExists = True
+            End If
+        Next j
+    Next i
+    
+    If Cells(2, 12).Value = "" Then
+        MsgBox "already completed"
+        Exit Sub
+    End If
+    
+    fromIndex = Cells(2, 12).Value
+    toIndex = Cells(2, 14).Value
+    colorToMove = Cells(2, 15).Interior.Color
+    height = Cells(2, 16).Value
+    
+    If arrowExists Then
+        '色水の移動（元から削除）
+        i = 0
+        While height > 0 And i < 4
+            If Cells(((fromIndex - 1) \ numColumns) * 6 + 3 + i, ((fromIndex - 1) Mod numColumns + 1) * 2).Interior.Color = colorToMove Then
+                Cells(((fromIndex - 1) \ numColumns) * 6 + 3 + i, ((fromIndex - 1) Mod numColumns + 1) * 2).Interior.ColorIndex = xlNone
+                height = height - 1
+            End If
+            i = i + 1
+        Wend
+        
+        '色水の移動（転送先に追加）
+        i = 0
+        height = Cells(2, 16).Value '再読み込み
+        While height > 0 And i < 4
+            If Cells((((toIndex - 1) \ numColumns) + 1) * 6 - i, ((toIndex - 1) Mod numColumns + 1) * 2).Interior.ColorIndex = xlNone Then
+                Cells((((toIndex - 1) \ numColumns) + 1) * 6 - i, ((toIndex - 1) Mod numColumns + 1) * 2).Interior.Color = colorToMove
+                height = height - 1
+            End If
+            i = i + 1
+        Wend
+        
+
+        '矢印の消去
+        For i = 2 To 14 Step 6
+            For j = 2 To 10 Step 2
+                If (Cells(i, j).Value = arrowFrom) Or (Cells(i, j).Value = arrowTo) Then
+                    Cells(i, j).Value = ""
+                End If
+            Next j
+        Next i
+
+        'Ansの移動
+        i = 2
+        While Cells(i, 12).Value <> ""
+            i = i + 1
+        Wend
+        Range("L3:P200").Cut Destination:=Range("L2")
+    
+    Else
+        '矢印の追加
+        Cells(((fromIndex - 1) \ numColumns) * 6 + 2, ((fromIndex - 1) Mod numColumns + 1) * 2).Value = arrowFrom
+        Cells(((toIndex - 1) \ numColumns) * 6 + 2, ((toIndex - 1) Mod numColumns + 1) * 2).Value = arrowTo
+    End If
+End Sub
+
+Sub clear()
+    Dim i, j, k, l, n_col, numColumns As Integer
+    
+    n_col = Cells(1, 4).Value
+    
+    If (n_col = 5) Or (n_col = 9) Then
+        numColumns = 4
+    Else
+        numColumns = 5
+    End If
+    
+    If Cells(2, 12).Value = "" Then
+        l = 15
+    Else
+        l = 1
+    End If
+    
+    For i = 3 To 15 Step 6
+        For j = 2 To 10 Step 2
+            If l > n_col Or j \ 2 > numColumns Then
+                For k = 0 To 3
+                    Cells(i + k, j).Interior.ColorIndex = 0
+                Next k
+            End If
+            Cells(i - 1, j).Value = ""
+            If j \ 2 <= numColumns Then
+                l = l + 1
+            End If
+        Next j
+    Next i
+End Sub

@@ -218,5 +218,3 @@ for i in range(num_glass): space.append(4 - len(glass[i]))
 
 ### 解答 ###
 dfs(glass, top_layer, space, ans)
-
-"C:\Users\ochi yuma\OneDrive\ドキュメント\programming\Python\LoveWater.py"
